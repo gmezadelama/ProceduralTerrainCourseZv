@@ -2,9 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum BiomeType
+{
+    Desert,
+    Tundra,
+    Savanna,
+    Forest,
+    Rainforest
+}
+
 public class BiomeBuilder : MonoBehaviour
 {
-    public BiomeRow[] biomesRows;
+    public Biome[] biomes;
+    public BiomeRow[] tableRows;
 
     public static BiomeBuilder instance;
 
@@ -27,7 +37,16 @@ public class BiomeBuilder : MonoBehaviour
                 int heatMapIndex = heatMapTypes[x, z].index;
                 int moistureMapIndex = moistureMapTypes[x, z].index;
 
-                Biome biome = biomesRows[moistureMapIndex].biomes[heatMapIndex];
+                Biome biome = null;
+
+                foreach(Biome b in biomes)
+                {
+                    if (b.type == tableRows[moistureMapIndex].tableColumns[heatMapIndex])
+                    {
+                        biome = b;
+                        break;
+                    }
+                }
 
                 pixels[index] = biome.color;
             }
@@ -41,17 +60,36 @@ public class BiomeBuilder : MonoBehaviour
 
         return texture;
     }
+
+    public Biome GetBiome (TerrainType heatTerrainType, TerrainType moistureTerrainType)
+    {
+        foreach(Biome b in biomes)
+        {
+            if (b.type == tableRows[moistureTerrainType.index].tableColumns[heatTerrainType.index])
+            {
+                return b;
+            }
+        }
+        
+        return null;
+    }
+    
 }
 
 [System.Serializable]
 public class BiomeRow
 {
-    public Biome[] biomes;
+    public BiomeType[] tableColumns;
 }
 
 [System.Serializable]
 public class Biome
 {
-    public string name;
+    public BiomeType type;
     public Color color;
+    public bool spawnPrefabs;
+    public GameObject[] spawnablePrefabs;
+    [Range(0.0f, 3.0f)]
+    public float density = 1.0f;
+
 }
