@@ -6,7 +6,8 @@ public enum TerrainVisualization
 {
     Height,
     Heat,
-    Moisture
+    Moisture,
+    Biome
 }
 
 public class TileGenerator : MonoBehaviour
@@ -80,22 +81,11 @@ public class TileGenerator : MonoBehaviour
 
         tileMeshCollider.sharedMesh = tileMeshFilter.mesh;
 
-        // create the height map texture
-        // Texture2D heightMapTexture = TextureBuilder.BuildTexture(hdHeigthMap, heightTerrainTypes);
-
-        // apply the height map texture to the MeshRenderer
-        // tileMeshRenderer.material.mainTexture = heightMapTexture;
-
-        // Generate heatMap
-        // float[,] heatMap = GenerateHeatMap(heightMap);
-        // tileMeshRenderer.material.mainTexture = TextureBuilder.BuildTexture(heightMap, heatTerrainTypes);
-
-        // Generate moistureMap
-        // float[,] moistureMap = GenerateMoistureMap(heightMap);
-        // tileMeshRenderer.material.mainTexture = TextureBuilder.BuildTexture(moistureMap, moistureTerrainTypes);
-
         float[,] heatMap = GenerateHeatMap(heightMap);
         float[,] moistureMap = GenerateMoistureMap(heightMap);
+
+        TerrainType[,] heatTerrainTypeMap = TextureBuilder.CreateTerrainTypeMap(heatMap, heatTerrainTypes);
+        TerrainType[,] moistureTerrainTypeMap = TextureBuilder.CreateTerrainTypeMap(moistureMap, moistureTerrainTypes);
 
         switch(visualizationType)
         {
@@ -107,6 +97,9 @@ public class TileGenerator : MonoBehaviour
                 break;
             case TerrainVisualization.Moisture:
                 tileMeshRenderer.material.mainTexture = TextureBuilder.BuildTexture(moistureMap, moistureTerrainTypes);
+                break;
+            case TerrainVisualization.Biome:
+                tileMeshRenderer.material.mainTexture = BiomeBuilder.instance.BuildTexture(heatTerrainTypeMap, moistureTerrainTypeMap);
                 break;
         }
     }
@@ -154,6 +147,7 @@ public class TileGenerator : MonoBehaviour
 [System.Serializable]
 public class TerrainType
 {
+    public int index;
     [Range(0.0f, 1.0f)]
     public float threshold;
     public Gradient colorGradient;
